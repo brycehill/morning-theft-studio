@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio Tracker</title>
+  <link rel="stylesheet" type="text/css" href="./assets/css/bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="./assets/css/main.css">
+</head>
+<body>
+<div class='container'>
+  <header>
+    <h1><a href='/docs/index.html'>Studio Tracker</a></h1>  
+  </header>
+  <div class='main'>
+    <div class='songs-sidebar col-md-4'>
+      <!-- <div class='row'>
+        <div class="col-md-12">
+          <div class="input-group">
+            <input type='text' id='song-form' class='form-control' />
+            <span class="input-group-btn">
+              <button type='button' id='add-song' class='btn btn-default song-form-btn'>Add</button>
+            </span>
+          </div>
+        </div>
+      </div> -->
+      <div class="songs list-group"></div>
+    </div>
+    <div class='song-info col-md-8'>
+      <p>
+        <span class='glyphicon glyphicon-arrow-left'></span>
+        Pick a song to the left
+      </p>
+    </div>
+  </div>
+</div>
+<footer></footer>
+
+<script type='text/template' id='song-template'>
+  <%= title %>
+  <span class="badge">
+    <% var len = _.filter(instruments, function(i) { return i.tracked !== true }).length %>
+    <%= len %>
+  </span>
+</script>
+
+<script type='text/template' id='song-info-template'>
+  <h2 class='title'><%= title %></h2>
+
+  <div class='row'>
+    <div class="col-sm-5">
+      <div class="input-group">
+        <input type='text' id='instrument-form' class='form-control' />
+        <span class="input-group-btn">
+          <button type='button' id='add-instrument' class='btn btn-default'>Add</button>
+        </span>
+      </div>
+    </div>
+  </div>
+</script>
+
+<script type='text/template' id='instrument-template'>
+  <input type='checkbox' <% if (tracked) { %> checked <% } %> /> 
+  <span><%= instrument %></span>
+    <% if (obj.notes) { %>
+      <span class='.glyphicon .glyphicon-plus'></span>
+      <div class='notes'>
+        <%= obj.notes %>
+      </div>
+    <% } %>
+    <button class='delete-button btn btn-danger btn-xs'>remove</button>
+</script>
+
+<script src='./assets/js/libs/jquery-2.0.3.min.js'></script>
+<script src='./assets/js/libs/bootstrap.min.js'></script>
+<script src='./assets/js/libs/underscore-min.js'></script>
+<script src='./assets/js/libs/backbone.min.js'></script>
+<script src='./assets/js/views/MainView.js'></script>
+<script src='./assets/js/views/SongsView.js'></script>
+<script src='./assets/js/views/InstrumentView.js'></script>
+<script src='./assets/js/views/InstrumentsView.js'></script>
+<script src='./assets/js/views/SongInfoView.js'></script>
+<script src='./assets/js/views/SongView.js'></script>
+<script src='./assets/js/models/Instrument.js'></script>
+<script src='./assets/js/models/Instruments.js'></script>
+<script src='./assets/js/models/Song.js'></script>
+<script src='./assets/js/models/Songs.js'></script>
+<script src='./assets/js/Router.js'></script>
+<script>
+  Tracker.songs.fetch().then(function() {
+    Tracker.AppView = new Tracker.MainView({ collection: Tracker.songs }).render();
+  });
+</script>
+</body>
+</html>

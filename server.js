@@ -1,5 +1,6 @@
 var restify = require('restify'),
     mongoose = require('mongoose'),
+    ObjectId = mongoose.Types.ObjectId,
     Song = require('./models/Song'),
     _ = require('underscore'),
     fs = require('fs');
@@ -17,15 +18,14 @@ server.get('/', function(req, res) {
   fs.readFile('./public/index.html', function(err, file) {
     if (err) throw err;
 
-    res.send(200);
+    // res.send(200);
     res.write(file);
     res.end();
   });
 });
 
-server.get(/\/docs\/?.*/, restify.serveStatic({
-  directory: './public',
-  default: 'index.html'
+server.get(/\/assets\/.*/, restify.serveStatic({
+  directory: './public'
 }));
 
 /* * * * * * * *
@@ -33,34 +33,38 @@ server.get(/\/docs\/?.*/, restify.serveStatic({
  * * * * * * * */
 
 // Get info about a song. 
-server.get('/songs/:song', function(req, res) {
-  // Split the song on capital letters and join with a space. 
-  var song = req.params.song.split(/(?=[A-Z])/).join(' ');
-
-  Song.findOne({_id: song}, function(err, song) {
+server.get('/songs/:id', function(req, res) {
+  Song.findOne({_id: new ObjectId(req.params.id)}, function(err, song) {
     if (err) throw err;
 
     res.send(200, song);
   });
 });
 
+// Get all the songs.
+server.get('/songs', function(req, res) {
+  Song.find(function(err, songs) {
+    if (err) throw err;
+
+    res.send(200, songs);
+  });
+});
+
 // Add a new song. 
-server.post('/songs/:song', function(req, res) {
-  var song = req.params.song.split(/(?=[A-Z])/).join(' '),
-      s = new Song({ _id: song });
+server.post('/songs', function(req, res) {
+  var title = req.params.title,//.split(/(?=[A-Z])/).join(' '),
+      s = new Song({ title: title });
 
   s.save(function(err) {
     if (err) throw err;
 
-    res.send(201, song);
+    res.send(201, s);
   });
 });
 
 // Delete a song. 
-server.del('/songs/:song', function(req, res) {
-  var song = req.params.song.split(/(?=[A-Z])/).join(' ');
-
-  Song.findByIdAndRemove(song, function(err) {
+server.del('/songs/:id', function(req, res) {
+  Song.findByIdAndRemove(req.params.id, function(err) {
     if (err) throw err;
 
     res.send(204);
@@ -73,18 +77,14 @@ server.del('/songs/:song', function(req, res) {
  * * * * * * * * * * */
 
 // Add a needed Instrument to the song
-server.post('/songs/:song/instruments/:instrument', function(req, res) {
-  var song       = req.params.song.split(/(?=[A-Z])/).join(' '),
-      instrument = req.params.instrument;
+server.put('/songs/:id', function(req, res) {
+  // var song       = req.params.song.split(/(?=[A-Z])/).join(' '),
+  var instruments = req.params.instruments;
 
-  Song.findOne({_id: song}, function(err, song) {
+  Song.findOne({_id: new ObjectId(req.params.id)}, function(err, song) {
     if (err) throw err;
 
-    song.instruments.push({
-      instrument: instrument,
-      needed: true,
-      tracked: false
-    });
+    song.instruments = instruments;
 
     song.save();
     res.send(201, song);
@@ -92,16 +92,16 @@ server.post('/songs/:song/instruments/:instrument', function(req, res) {
 });
 
 // Update an instrument's tracked value. 
-server.put('/songs/:song/instruments/:instrument', function(req, res) {
-  var song       = req.params.song.split(/(?=[A-Z])/).join(' '),
-      instrument = req.params.instrument,
-      tracked = req.params.tracked === 'true' ? true : false;
+server.put('/songs/:id/instruments/:instrument', function(req, res) {
+  var id       = req.params.id,
+      instrument = req.params.instrument.toLowerCase(),
+      tracked = req.params.tracked;
 
-  Song.findOne({_id: song}, function(err, song) {
+  Song.findOne({_id: new ObjectId(id)}, function(err, song) {
     if (err) throw err;
 
     var obj = _.find(song.instruments, function(i) {
-      return i.instrument === instrument;
+      return i.instrument.toLowerCase() === instrument;
     });
 
     obj.tracked = tracked;
@@ -115,15 +115,15 @@ server.put('/songs/:song/instruments/:instrument', function(req, res) {
   });
 });
 
-server.del('/songs/:song/instruments/:instrument', function(req, res) {
-  var song       = req.params.song.split(/(?=[A-Z])/).join(' '),
-      instrument = req.params.instrument;
+server.del('/songs/:id/instruments/:instrument', function(req, res) {
+  var id       = req.params.id,
+      instrument = req.params.instrument.toLowerCase();
 
-  Song.findOne({_id: song}, function(err, song) {
+  Song.findOne({_id: new ObjectId(id)}, function(err, song) {
     if (err) throw err;
 
     var obj = _.find(song.instruments, function(i) {
-      return i.instrument === instrument;
+      return i.instrument.toLowerCase() === instrument;
     });
 
     song.instruments.splice(_.indexOf(song.instruments, obj), 1);

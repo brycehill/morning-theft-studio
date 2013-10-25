@@ -1,0 +1,70 @@
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,300,600);
+
+body {
+  font-family: 'Open Sans';
+  font-size: 16px;
+  background-color: #EFFAF1;
+}
+
+header {
+  margin-bottom: 40px;
+  padding-left: 15px;
+}
+
+h1 a {
+  color: #000;
+  /*text-decoration: none;*/
+}
+
+h1 a:hover {
+  text-decoration: none;
+}
+
+.title {
+  margin-top: -5px;
+}
+
+.songs {
+  padding-left: 0;
+}
+
+.songs a {
+  cursor: pointer;
+}
+
+.songs a:hover {
+  text-decoration: none;
+}
+
+.instruments {
+  list-style-type: none;
+  padding: 0;
+}
+
+.instruments li {
+  line-height: 25px;
+}
+
+.tracked {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
+.delete-button {
+  display: none;
+  margin-left: 15px;
+  /*background-color: rgb(173, 131, 139);*/
+  /*border-color: rgb(173, 131, 139);*/
+}
+
+input[type=checkbox] {
+  margin-top: 15px;
+}
+
+.notes {
+  display: none;
+}
+
+.badge {
+  background-color: #f0ad4e;
+}

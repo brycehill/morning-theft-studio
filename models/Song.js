@@ -2,11 +2,12 @@ var mongoose = require('mongoose'),
     Schema   = mongoose.Schema;
 
 var Song = new Schema({
-  _id: String,
+  title: String,
+  track: Number,
   instruments: [{
     instrument: String,
-    needed: Boolean,
-    tracked: Boolean
+    tracked: Boolean,
+    notes: String
   }]
 });
 
