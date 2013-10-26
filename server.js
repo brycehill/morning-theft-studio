@@ -3,26 +3,65 @@ var restify = require('restify'),
     ObjectId = mongoose.Types.ObjectId,
     Song = require('./models/Song'),
     _ = require('underscore'),
-    fs = require('fs');
+    fs = require('fs'),
+    Cookies = require('cookies'),
+    User = require('./models/User');
 
 mongoose.connect('mongodb://localhost/morning-theft-studio');
 
 var server = restify.createServer();
 server.use(restify.bodyParser({ mapParams: true }));
+server.use(restify.queryParser());
 
 /* * * * * * * * *
  * File Serving  *
  * * * * * * * * */
 
 server.get('/', function(req, res) {
-  fs.readFile('./public/index.html', function(err, file) {
-    if (err) throw err;
+  var cookies = new Cookies(req, res);
 
-    // res.send(200);
-    res.write(file);
-    res.end();
-  });
+  if (cookies.get('sid')) {
+    fs.readFile('./public/index.html', function(err, file) {
+      if (err) throw err;
+
+      // res.send(200);
+      res.write(file);
+      res.end();
+    });
+  } else {
+    fs.readFile('./public/login.html', function(err, file) {
+      if (err) throw err;
+
+      // res.send(200);
+      res.write(file);
+      res.end();
+    });
+  }
 });
+
+server.get('/login', function(req, res) {
+  var cookies = new Cookies(req, res);
+
+  if (cookies.get('sid')) {
+    fs.readFile('./public/index.html', function(err, file) {
+      if (err) throw err;
+
+      // res.send(200);
+      res.write(file);
+      res.end();
+    });
+  } else {
+    fs.readFile('./public/login.html', function(err, file) {
+      if (err) throw err;
+
+      // res.send(200);
+      res.write(file);
+      res.end();
+    });
+  }
+});
+
+
 
 server.get(/\/assets\/.*/, restify.serveStatic({
   directory: './public'
@@ -133,6 +172,30 @@ server.del('/songs/:id/instruments/:instrument', function(req, res) {
 
       res.send(200, song);
     });
+  });
+});
+
+/* * * * * * * * * *
+ *  Authentication *
+ * * * * * * * * * */
+
+// Extremely crude authentication routine. 
+server.post('/login', function(req, res) {
+  var username = req.params.username,
+      password = req.params.password,
+      cookies = new Cookies(req, res);
+
+  User.findOne({ username: username }, function(err, user) {
+    if (err) return done(err);
+
+    if (!user || user.password !== password) {
+      return done(null, false, { message: 'Incorrect username or password.' });
+    }
+
+    cookies.set('sid', user._id);
+    res.writeHead(302, {'Location': '/'});
+    res.end();
+
   });
 });
 
